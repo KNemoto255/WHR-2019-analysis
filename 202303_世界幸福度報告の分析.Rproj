@@ -1,0 +1,123 @@
+---
+title: "世界幸福度報告(2019年) - 世界的な幸福度の分布と日本国の地位"
+author: "Keisuke Nemoto"
+date: "2023-03-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 世界幸福度報告(2019年) - 世界的な幸福度の分布と日本国の地位
+
+データ分析のケーススタディーとして、国際連合の持続可能開発ソリューションネットワークが発行する幸福度調査のレポート・統計データを分析しました。 *世界幸福度報告（英: World Happiness Report）*では、調査国民の幸福度が0～10のどの段階にあるかを 答える世論調査によって得られた数値の平均値がスコアとなります。 スコアの平均値・順位の他、以下の値を調査して指標としています。
+
+1.  人口一人当たりのGDP:国内総生産（対数比に換算 されている)
+2.  社会的支援（公的なソーシャルサポートの質や、頼ることができる親戚や友人がいるか）
+3.  健康寿命（健康的に過ごせる最後の年齢の平均）
+4.  人生の選択の自由（自身の人生の選択の自由に満足しているか）
+5.  寛容さ（過去1か月の間にチャリティなどをしたことがあるか）
+6.  腐敗の認識（社会・政府に腐敗が蔓延していないか）
+
+## 出展・使用データ
+
+-   データ："World Happiness Report, Kaggle"
+
+<!-- -->
+
+-   <https://www.kaggle.com/datasets/unsdsn/world-happiness>
+
+-   出典："World Happiness Report (WHR)"
+
+-   <https://worldhappiness.report/>
+
+今回は世界幸福度報告(2019年)のスコアを可視化する他、以下の観点からデータ分析を行います。
+
+1.  G7、G20、BRICS等々の政治フォーラム・国家グループごとに幸福度・指標に有意な違いがあるか
+2.  日本国の幸福度・指標はどのような地位に相当するか
+3.  幸福度以外の指標は実際どれほど幸福度の向上に寄与しているか
+4.  日本国民の主観的な幸福度を向上するには、どのような指標を向上するべきか(課題解決
+
+## データ分析の準備
+
+データ分析の準備として、まず分析にかけるデータ・分析に使うパッケージをインポートします。
+
+-   今回はWorld Happiness Report 2019, Kaggle"のデータにG7(Group of Seven、グループ・オブ・セブン)・G20(G7に参加する7か国+新興国13か国の計20の国々)、BRICS(ブラジル・ロシア、インド、中国、南アフリカ)のラベルを加えたデータを用います。
+
+-   データがインポートできたら、まず以下の作業を行います。
+
+1.  データを要約（skim_without_charts）
+2.  データのラベル名を表示（colname）
+3.  データの要約統計量・度数を算出（summary）
+4.  データの先頭5行を表示（head）
+5.  データをペインに表示（view）
+
+``` {setwd("c:\\users\\user\\desktop\\データ分析学習用資料")}
+setwd("C:\\Users\\user\\Desktop\\Data_Learning")
+data <- read.csv("2019-02.csv")
+
+library(tidyverse)
+library(ggplot2)
+
+
+#データの要約統計量、先頭5行、データをペインに表示
+summary(data)
+head(data)
+view(data)
+```
+
+![](2023_%E3%83%87%E3%83%BC%E3%82%BF%E8%A6%81%E7%B4%84.png)
+
+## 探索的データ分析
+
+探索的データ分析(EDA, Exploratory data analysis)とは、可視化・変換を使ってデータを系統的に分析する手法です。以下のサイクルを繰り返して具体的な課題に答えることを目指します。
+
+1.  データに対する質問を立てる
+2.  可視化・変換・モデリングにより答えを探索する
+3.  学んだことを使って質問を洗練する
+
+```{r echo=FALSE}
+
+setwd("C:\\Users\\user\\Desktop\\Data_Learning")
+data <- read.csv("2019-03.csv")
+
+library(tidyverse)
+library(ggplot2)
+summary(data)
+```
+
+```{r echo=FALSE}
+ggplot(data = data, aes(x = G7, y = Score, fill = G7)) + 
+geom_boxplot() + 
+geom_jitter(width =0.15, alpha = 0.5)
+```
+
+```{r echo=FALSE}
+ggplot(data = data, aes(x = G20, y = Score, fill = G20)) + 
+geom_boxplot() + 
+geom_jitter(width =0.15, alpha = 0.5)
+```
+
+```{r echo=FALSE}
+ggplot(data = data, aes(x = BRICS, y = Score, fill = BRICS)) + 
+geom_boxplot() + 
+geom_jitter(width =0.15, alpha = 0.5)
+```
+
+### 問いかけ
+
+1.  G7、G20、BRICS等々の政治フォーラム・国家グループごとに幸福度・指標に有意な違いがあるか
+2.  日本国の幸福度はどのような地位に相当するか
+
+### 結論
+
+1.  G7・G20とされる国々の幸福度は、非G7・非G20よりも有意に高い。BRICSとされる国の幸福度はその他の国とほぼ同じ水準で、有意な差はない。
+2.  日本の幸福度はG7中で最下位、かつ非G7国の25-50%と同じ水準
+
+4つの問いの内2つに答えが得られたので、次の問いを考える。
+
+散布図とマージナルヒストグラムを使って探索を行う他、重回帰分析で寄与率と有意度を検定する
+
+1.  1幸福度以外の指標は、実際どれほど幸福度の向上に寄与しているか
+2.  日本国民の主観的な幸福度を向上するには、どのような指標を向上するべきか(課題解決
