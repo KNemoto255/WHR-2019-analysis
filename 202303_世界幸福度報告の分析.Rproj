@@ -23,13 +23,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ## 出展・使用データ
 
 -   データ："World Happiness Report, Kaggle"
-
-<!-- -->
-
 -   <https://www.kaggle.com/datasets/unsdsn/world-happiness>
-
 -   出典："World Happiness Report (WHR)"
-
 -   <https://worldhappiness.report/>
 
 今回は世界幸福度報告(2019年)のスコアを可視化する他、以下の観点からデータ分析を行います。
@@ -100,7 +95,19 @@ geom_jitter(width =0.15, alpha = 0.5)
 ```
 
 ```{r echo=FALSE}
+ggplot(data = data, aes(x = NC, y = Score, fill = NC)) + 
+geom_boxplot() + 
+geom_jitter(width =0.15, alpha = 0.5)
+```
+
+```{r echo=FALSE}
 ggplot(data = data, aes(x = BRICS, y = Score, fill = BRICS)) + 
+geom_boxplot() + 
+geom_jitter(width =0.15, alpha = 0.5)
+```
+
+```{r echo=FALSE}
+ggplot(data = data, aes(x = Group, y = Score, fill = Group)) + 
 geom_boxplot() + 
 geom_jitter(width =0.15, alpha = 0.5)
 ```
@@ -119,5 +126,16 @@ geom_jitter(width =0.15, alpha = 0.5)
 
 散布図とマージナルヒストグラムを使って探索を行う他、重回帰分析で寄与率と有意度を検定する
 
-1.  1幸福度以外の指標は、実際どれほど幸福度の向上に寄与しているか
+1.  幸福度以外の指標は、実際どれほど幸福度の向上に寄与しているか
 2.  日本国民の主観的な幸福度を向上するには、どのような指標を向上するべきか(課題解決
+
+## Scoreと6つの指標を重回帰分析
+
+```{r echo=FALSE}
+data_mla <- data[,c(3,4,5,6,7,8,9)]
+
+result_mra <- lm(Score ~ GDP.per.capita + Social.support + Healthy.life.expectancy + Freedom.to.make.life.choices + Generosity + Perceptions.of.corruption, data = data_mla)
+summary(result_mra)
+```
+
+## 日本の幸福度の上昇
